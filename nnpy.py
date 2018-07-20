@@ -13,7 +13,6 @@ Configurations
 DB_NAME = "nnpy.db"
 VALID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 ID_LEN = 5
-BASE_URL = "http://example.com/"
 
 app = Flask(__name__)
 
@@ -40,7 +39,7 @@ def index():
         dbCursor.execute("INSERT INTO pastes VALUES (?, ?)", paste)
         db.commit()
         db.close()
-        return BASE_URL + pasteId + '\n'
+        return request.url_root + pasteId + '\n'
 
 @app.route("/<pasteId>")
 def paste(pasteId):
