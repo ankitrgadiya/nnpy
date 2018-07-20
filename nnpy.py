@@ -56,3 +56,6 @@ def paste(pasteId):
             return Response('Not Found',  mimetype='text/plain')
         else:
             return Response(data, mimetype='text/plain')
+
+if __name__ == "__main__":
+    app.run()
