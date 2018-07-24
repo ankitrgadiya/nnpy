@@ -4,8 +4,9 @@ BSD 3-Clause License
 """
 
 from random import choice
-from flask import Flask, request, Response
+from flask import Flask, request, Response, redirect
 from sqlite3 import connect
+import re
 
 """
 Configurations
@@ -13,6 +14,7 @@ Configurations
 DB_NAME = "nnpy.db"
 VALID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 ID_LEN = 5
+URL_REGEX = re.compile('^https?:\/\/([a-zA-Z0-9\-]+\.)+[a-zA-Z0-9\-]+(\/[^\s]*)?$')
 
 app = Flask(__name__)
 
@@ -54,7 +56,10 @@ def paste(pasteId):
         if data == None:
             return Response('Not Found',  mimetype='text/plain')
         else:
-            return Response(data, mimetype='text/plain')
+            if re.match(URL_REGEX, data[0]) is not None:
+                return redirect(data[0].strip(), code=302)
+            else:
+                return Response(data[0], mimetype='text/plain')
 
 if __name__ == "__main__":
     app.run()
