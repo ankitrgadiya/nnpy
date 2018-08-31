@@ -3,16 +3,15 @@ Copyright (c) 2018, Ankit R. Gadiya
 BSD 3-Clause License
 """
 
-from random import choice
 from flask import Flask, request, Response, redirect
-from sqlite3 import connect
+from random import sample
 import re
+from sqlite3 import connect
+from string import ascii_letters, digits
 
-"""
-Configurations
-"""
+# Configurations
 DB_NAME = "nnpy.db"
-VALID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+VALID_CHARS = ascii_letters + digits
 ID_LEN = 5
 URL_REGEX = re.compile('^https?:\/\/([a-zA-Z0-9\-]+\.)+[a-zA-Z0-9\-]+(\/[^\s]*)?$')
 
@@ -27,18 +26,14 @@ def index():
         db = connect(DB_NAME)
         dbCursor = db.cursor()
 
-        valid = False
-        while not valid:
-            pasteId = ""
-            for i in range(ID_LEN):
-                pasteId += choice(VALID_CHARS)
+        while True:
+            pasteId = ''.join(sample(VALID_CHARS, ID_LEN))
 
-            query = dbCursor.execute("SELECT data FROM pastes WHERE id = '%s'" % pasteId)
+            query = dbCursor.execute("SELECT data FROM pastes WHERE id = '{}'".format(pasteId))
             if len(query.fetchall()) == 0:
-                valid = True
+                break
 
-        paste = (pasteId, data)
-        dbCursor.execute("INSERT INTO pastes VALUES (?, ?)", paste)
+        dbCursor.execute("INSERT INTO pastes VALUES (?, ?)", (pasteId, data))
         db.commit()
         db.close()
         return request.url_root + pasteId + '\n'
@@ -50,7 +45,7 @@ def paste(pasteId):
     else:
         db = connect(DB_NAME)
         dbCursor = db.cursor()
-        query = dbCursor.execute("SELECT data FROM pastes WHERE id = '%s'" % pasteId)
+        query = dbCursor.execute("SELECT data FROM pastes WHERE id = '{}'".format(pasteId))
         data = query.fetchone()
         db.close()
         if data == None:
